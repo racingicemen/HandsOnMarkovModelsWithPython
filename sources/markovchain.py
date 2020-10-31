@@ -22,12 +22,16 @@ class MarkovChain:
             current_state = next_state
         return future_states
 
-    def is_accessible(self, state_i, state_f):
+    def is_accessible(self, state_i, state_f, check_upto_depth=1024):
+        depth = 0
         reachable_states = [self.index_dict[state_i]]
         for state in reachable_states:
+            if depth == check_upto_depth:
+                break
             if state == self.index_dict[state_f]:
                 return True
             reachable_states.extend(np.nonzero(self.transition_matrix[state, :])[0])
+            depth += 1
         return False
 
     def is_irreducible(self):
