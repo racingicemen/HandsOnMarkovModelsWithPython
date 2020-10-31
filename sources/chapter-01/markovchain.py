@@ -69,19 +69,20 @@ class MarkovChain:
             return True
         return False
 
+    def is_absorbing(self, state):
+        state_index = self.index_dict[state]
+        if self.transition_matrix[state_index, state_index] == 1:
+            return True
+        return False
+
 
 if __name__ == '__main__':
-    transient_matrix = [
-        [0, 0.5, 0.5, 0],
-        [0, 0, 0.25, 0.75],
-        [0, 0, 0, 1],
-        [0, 0, 0.5, 0.5]
+    absorbing_matrix = [
+        [0, 1, 0],
+        [0.5, 0, 0.5],
+        [0, 0, 1]
     ]
-    transient_markov = MarkovChain(transition_matrix=transient_matrix,
-                                   states=['A', 'B', 'C', 'D'])
-
-    print(transient_markov.is_transient('A'))
-    print(transient_markov.is_transient('B'))
-    print(transient_markov.is_transient('C'))
-
-
+    absorbing_chain = MarkovChain(transition_matrix=absorbing_matrix,
+                                  states=['A', 'B', 'C'])
+    print(absorbing_chain.is_absorbing('A'))
+    print(absorbing_chain.is_absorbing('C'))
