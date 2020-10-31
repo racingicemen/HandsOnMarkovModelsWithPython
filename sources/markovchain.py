@@ -1,4 +1,5 @@
 import numpy as np
+from itertools import combinations
 
 
 class MarkovChain:
@@ -21,14 +22,42 @@ class MarkovChain:
             current_state = next_state
         return future_states
 
+    def is_accessible(self, state_i, state_f):
+        reachable_states = [self.index_dict[state_i]]
+        for state in reachable_states:
+            if state == self.index_dict[state_f]:
+                return True
+            reachable_states.extend(np.nonzero(self.transition_matrix[state, :])[0])
+        return False
+
+    def is_irreducible(self):
+        for (i, j) in combinations(self.states, 2):
+            if not self.is_accessible(i, j):
+                return False
+        return True
+
 
 if __name__ == '__main__':
-    transition_matrix = [
-        [0.8, 0.19, 0.01],
-        [0.2, 0.7, 0.1],
-        [0.1, 0.2, 0.7]
+    transition_irreducible = [
+        [0.5, 0.5, 0, 0],
+        [0.25, 0, 0.5, 0.25],
+        [0.25, 0.5, 0, 0.25],
+        [0, 0, 0.5, 0.5]
     ]
-    weather_chain = MarkovChain(transition_matrix=transition_matrix, states=['Sunny', 'Rainy', 'Snowy'])
-    print(weather_chain.next_state(current_state='Sunny'))
-    print(weather_chain.next_state(current_state='Snowy'))
-    print(weather_chain.generate_states(current_state='Snowy'))
+    transition_reducible = [
+        [0.5, 0.5, 0, 0],
+        [0, 1, 0, 0],
+        [0.25, 0.5, 0, 0],
+        [0, 0, 0.25, 0.75]
+    ]
+
+    markov_irreducible = MarkovChain(transition_matrix=transition_irreducible, states=['A', 'B', 'C', 'D'])
+    markov_reducible = MarkovChain(transition_matrix=transition_reducible, states=['A', 'B', 'C', 'D'])
+
+    print(markov_irreducible.is_accessible(state_i='A', state_f='D'))
+    print(markov_irreducible.is_accessible(state_i='B', state_f='D'))
+    print(markov_irreducible.is_irreducible())
+    print(markov_reducible.is_accessible(state_i='A', state_f='D'))
+    print(markov_reducible.is_accessible(state_i='D', state_f='A'))
+    print(markov_reducible.is_accessible(state_i='C', state_f='D'))
+    print(markov_reducible.is_irreducible())
