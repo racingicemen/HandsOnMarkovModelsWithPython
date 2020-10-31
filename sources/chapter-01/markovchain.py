@@ -64,32 +64,24 @@ class MarkovChain:
                 return False
         return True
 
+    def is_transient(self, state):
+        if np.all(self.transition_matrix[~self.index_dict[state], self.index_dict[state]] == 0):
+            return True
+        return False
+
 
 if __name__ == '__main__':
-    transition_periodic = [
-        [0, 1, 0, 0, 0],
-        [0, 0, 1, 0, 0],
-        [0.5, 0, 0, 0.5, 0],
-        [0, 0, 0, 0, 1],
-        [0, 0, 1, 0, 0]
+    transient_matrix = [
+        [0, 0.5, 0.5, 0],
+        [0, 0, 0.25, 0.75],
+        [0, 0, 0, 1],
+        [0, 0, 0.5, 0.5]
     ]
-    transition_aperiodic = [
-        [0, 1, 0, 0, 0],
-        [0, 0, 1, 0, 0],
-        [0.5, 0.25, 0, 0.25, 0],
-        [0, 0, 0, 0, 1],
-        [0, 0, 0.5, 0.5, 0]
-    ]
+    transient_markov = MarkovChain(transition_matrix=transient_matrix,
+                                   states=['A', 'B', 'C', 'D'])
 
-    markov_periodic = MarkovChain(transition_matrix=transition_periodic,
-                                  states=['A', 'B', 'C', 'D', 'E'])
-    markov_aperiodic = MarkovChain(transition_matrix=transition_aperiodic,
-                                   states=['A', 'B', 'C', 'D', 'E'])
+    print(transient_markov.is_transient('A'))
+    print(transient_markov.is_transient('B'))
+    print(transient_markov.is_transient('C'))
 
-    print(markov_periodic.get_period('A'))
-    print(markov_periodic.get_period('C'))
-    print(markov_periodic.is_aperiodic())
-    print(markov_aperiodic.get_period('A'))
-    print(markov_aperiodic.get_period('B'))
-    print(markov_aperiodic.is_aperiodic())
 
