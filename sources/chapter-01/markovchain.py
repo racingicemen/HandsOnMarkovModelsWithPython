@@ -1,5 +1,7 @@
 import numpy as np
 from itertools import combinations
+from functools import reduce
+from math import gcd
 
 
 class MarkovChain:
@@ -40,28 +42,54 @@ class MarkovChain:
                 return False
         return True
 
+    def get_period(self, state, max_steps=50, max_trials=100):
+        periodic_lengths = []
+        a = []
+
+        for i in range(1, max_steps+1):
+            for j in range(max_trials):
+                last_states_chain = self.generate_states(current_state=state, number=i)[-1]
+                if last_states_chain == state:
+                    periodic_lengths.append(i)
+                    break
+
+        if len(periodic_lengths) > 0:
+            a = reduce(gcd, periodic_lengths)
+            return a
+
+    def is_aperiodic(self):
+        periods = [self.get_period(state) for state in self.states]
+        for period in periods:
+            if period != 1:
+                return False
+        return True
+
 
 if __name__ == '__main__':
-    transition_irreducible = [
-        [0.5, 0.5, 0, 0],
-        [0.25, 0, 0.5, 0.25],
-        [0.25, 0.5, 0, 0.25],
-        [0, 0, 0.5, 0.5]
+    transition_periodic = [
+        [0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0.5, 0, 0, 0.5, 0],
+        [0, 0, 0, 0, 1],
+        [0, 0, 1, 0, 0]
     ]
-    transition_reducible = [
-        [0.5, 0.5, 0, 0],
-        [0, 1, 0, 0],
-        [0.25, 0.5, 0, 0],
-        [0, 0, 0.25, 0.75]
+    transition_aperiodic = [
+        [0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0.5, 0.25, 0, 0.25, 0],
+        [0, 0, 0, 0, 1],
+        [0, 0, 0.5, 0.5, 0]
     ]
 
-    markov_irreducible = MarkovChain(transition_matrix=transition_irreducible, states=['A', 'B', 'C', 'D'])
-    markov_reducible = MarkovChain(transition_matrix=transition_reducible, states=['A', 'B', 'C', 'D'])
+    markov_periodic = MarkovChain(transition_matrix=transition_periodic,
+                                  states=['A', 'B', 'C', 'D', 'E'])
+    markov_aperiodic = MarkovChain(transition_matrix=transition_aperiodic,
+                                   states=['A', 'B', 'C', 'D', 'E'])
 
-    print(markov_irreducible.is_accessible(state_i='A', state_f='D'))
-    print(markov_irreducible.is_accessible(state_i='B', state_f='D'))
-    print(markov_irreducible.is_irreducible())
-    print(markov_reducible.is_accessible(state_i='A', state_f='D'))
-    print(markov_reducible.is_accessible(state_i='D', state_f='A'))
-    print(markov_reducible.is_accessible(state_i='C', state_f='D'))
-    print(markov_reducible.is_irreducible())
+    print(markov_periodic.get_period('A'))
+    print(markov_periodic.get_period('C'))
+    print(markov_periodic.is_aperiodic())
+    print(markov_aperiodic.get_period('A'))
+    print(markov_aperiodic.get_period('B'))
+    print(markov_aperiodic.is_aperiodic())
+
